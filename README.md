@@ -3,7 +3,7 @@ Marinade-finance liquid staking program for the Solana blockchain
 
 # Audits & Code Review
 
-## 2023-11-14 : upgrade with Anchor v0.27.0, version v2.0
+## 2024-04-16 : upgrade with Anchor v0.31.1, version v2.0
 
 commit: [`1bd5133`](https://github.com/marinade-finance/liquid-staking-program/pull/8)
 

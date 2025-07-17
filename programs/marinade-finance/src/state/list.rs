@@ -18,7 +18,7 @@ pub struct List {
 
 impl List {
     pub fn new(
-        discriminator: &[u8; 8],
+        discriminator: &[u8],
         item_size: u32,
         account: Pubkey,
         data: &mut [u8],
@@ -42,7 +42,7 @@ impl List {
         (account_len as u32 - 8) / item_size
     }
 
-    fn init_account(&self, discriminator: &[u8; 8], data: &mut [u8]) -> Result<()> {
+    fn init_account(&self, discriminator: &[u8], data: &mut [u8]) -> Result<()> {
         assert_eq!(self.count, 0);
         require_gte!(
             data.len(),

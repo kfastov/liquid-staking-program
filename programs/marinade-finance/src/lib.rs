@@ -31,7 +31,9 @@ security_txt! {
     auditors: "https://docs.marinade.finance/marinade-protocol/security/audits"
 }
 
-fn check_context<T>(ctx: &Context<T>) -> Result<()> {
+use anchor_lang::Bumps;
+
+fn check_context<T: Bumps>(ctx: &Context<T>) -> Result<()> {
     if !check_id(ctx.program_id) {
         return err!(MarinadeError::InvalidProgramId);
     }
@@ -61,7 +63,7 @@ pub mod marinade_finance {
     pub fn initialize(ctx: Context<Initialize>, data: InitializeData) -> Result<()> {
         check_context(&ctx)?;
         ctx.accounts
-            .process(data, *ctx.bumps.get("reserve_pda").unwrap())?;
+            .process(data, ctx.bumps.reserve_pda)?;
         Ok(())
     }
 

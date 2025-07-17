@@ -7,8 +7,11 @@ use crate::{
     events::admin::InitializeEvent,
     require_lte,
     state::{
-        fee::FeeCents, liq_pool::LiqPool, stake_system::StakeSystem,
-        validator_system::ValidatorSystem, Fee,
+        fee::FeeCents,
+        liq_pool::LiqPool,
+        stake_system::{StakeList, StakeSystem},
+        validator_system::{ValidatorList, ValidatorSystem},
+        Fee,
     },
     State, ID,
 };
@@ -34,14 +37,14 @@ pub struct Initialize<'info> {
         zero,
         owner = ID,
     )]
-    pub stake_list: UncheckedAccount<'info>,
+    pub stake_list: Account<'info, StakeList>,
 
     /// CHECK: Manual account data management (fixed item size list)
     #[account(
         zero,
         owner = ID,
     )]
-    pub validator_list: UncheckedAccount<'info>,
+    pub validator_list: Account<'info, ValidatorList>,
 
     pub msol_mint: Box<Account<'info, Mint>>,
 
@@ -145,6 +148,11 @@ impl<'info> Initialize<'info> {
         );
         self.check_reserve_pda(rent_exempt_for_token_acc)?;
         let msol_mint_authority_bump_seed = self.check_msol_mint()?;
+        let stake_list_info = self.stake_list.to_account_info();
+        let validator_list_info = self.validator_list.to_account_info();
+        let mut stake_list_data = stake_list_info.try_borrow_mut_data()?;
+        let mut validator_list_data = validator_list_info.try_borrow_mut_data()?;
+
         self.state.set_inner(State {
             msol_mint: *self.msol_mint.to_account_info().key,
             admin_authority,
@@ -156,16 +164,16 @@ impl<'info> Initialize<'info> {
             reward_fee: rewards_fee,
             stake_system: StakeSystem::new(
                 self.state_address(),
-                *self.stake_list.key,
-                &mut self.stake_list.data.as_ref().borrow_mut(),
+                self.stake_list.key(),
+                &mut stake_list_data,
                 slots_for_stake_delta,
                 min_stake,
                 0,
                 additional_stake_record_space,
             )?,
             validator_system: ValidatorSystem::new(
-                *self.validator_list.key,
-                &mut self.validator_list.data.as_ref().borrow_mut(),
+                self.validator_list.key(),
+                &mut validator_list_data,
                 validator_manager_authority,
                 additional_validator_record_space,
             )?,
