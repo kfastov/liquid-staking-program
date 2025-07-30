@@ -33,7 +33,7 @@ impl StakeRecord {
 pub struct StakeList {}
 
 impl Discriminator for StakeList {
-    const DISCRIMINATOR: [u8; 8] = *b"staker__";
+    const DISCRIMINATOR: &'static [u8] = b"staker__";
 }
 
 impl AccountDeserialize for StakeList {
@@ -46,7 +46,7 @@ impl AccountDeserialize for StakeList {
         if buf.len() < 8 {
             return err!(MarinadeError::InvalidStakeListDiscriminator);
         }
-        if buf[0..8] != Self::DISCRIMINATOR {
+        if &buf[0..8] != Self::DISCRIMINATOR {
             return err!(MarinadeError::InvalidStakeListDiscriminator);
         }
         *buf = &buf[8..];
@@ -117,7 +117,7 @@ impl StakeSystem {
         additional_record_space: u32,
     ) -> Result<Self> {
         let stake_list = List::new(
-            &StakeList::DISCRIMINATOR,
+            StakeList::DISCRIMINATOR,
             StakeRecord::default().try_to_vec().unwrap().len() as u32 + additional_record_space,
             stake_list_account,
             stake_list_data,
